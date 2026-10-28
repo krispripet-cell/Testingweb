@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MasjidFinance - Islamic Public Finance Platform</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        emerald: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            600: '#059669',
+                            700: '#047857',
+                            800: '#065f46',
+                            900: '#064e3b',
+                            950: '#022c22',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        .signage-gradient {
+            background: radial-gradient(circle at top right, #064e3b, #022c22, #0f172a);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <!-- Header Navigation -->
+    <header class="bg-emerald-950 text-white sticky top-0 z-30 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                
+                <!-- Mosque Identity -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-amber-300 font-bold text-xl shadow-inner">
+                        <i class="fa-solid fa-mosque"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <h1 id="headerMosqueName" class="font-bold text-base sm:text-lg tracking-tight">Masjid Al-Amanah</h1>
+                            <button onclick="changeMosqueName()" class="text-emerald-400 hover:text-amber-300 text-xs transition" title="Ubah Nama Masjid">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                        </div>
+                        <p class="text-[11px] text-emerald-300 flex items-center space-x-1">
+                            <i class="fa-solid fa-scale-balanced text-[10px] text-amber-400"></i>
+                            <span>Islamic Public Finance Lens</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Action Controls -->
+                <div class="flex items-center space-x-2 sm:space-x-3">
+                    <button onclick="toggleSignageMode()" class="px-3 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs rounded-xl shadow transition flex items-center space-x-1.5">
+                        <i class="fa-solid fa-tv text-sm"></i>
+                        <span class="hidden md:inline">Mode TV / Signage Jum'at</span>
+                    </button>
+                    <button onclick="openModal('txModal')" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs rounded-xl shadow transition flex items-center space-x-1.5">
+                        <i class="fa-solid fa-plus text-sm"></i>
+                        <span>Tambah Transaksi</span>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </header>
+
+    <!-- Islamic Public Finance Principle Tagbar -->
+    <section class="bg-emerald-900 text-emerald-100 py-2.5 border-b border-emerald-800 text-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center space-x-2">
+                <span class="bg-amber-400 text-slate-950 px-2 py-0.5 rounded font-mono font-extrabold text-[10px] uppercase tracking-wider">Prinsip Keuangan</span>
+                <span class="hidden sm:inline">Kas Masjid Adalah Harta Publik Umat — Wajib Transparan, Bebas Idle Fund & Tepat Sasaran</span>
+            </div>
+            <div class="flex items-center space-x-4 text-[11px] text-emerald-200">
+                <span title="Zakat terikat 8 Asnaf (QS At-Taubah: 60)"><i class="fa-solid fa-lock text-amber-400 mr-1"></i>Zakat (Terikat)</span>
+                <span title="Infaq/Sedekah fleksibel operasional & sosial"><i class="fa-solid fa-unlock text-teal-300 mr-1"></i>Infaq (Fleksibel)</span>
+                <span title="Wakaf Pokok Utuh (Abadi)"><i class="fa-solid fa-vault text-blue-300 mr-1"></i>Wakaf (Abadi)</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- Idle Fund Alert (Islamic Public Finance Warning) -->
+        <div id="idleFundAlert" class="hidden bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-2xl shadow-sm">
+            <div class="flex items-start">
+                <div class="flex-shrink-0 text-amber-600 mt-0.5">
+                    <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+                </div>
+                <div class="ml-3 flex-grow">
+                    <h3 class="text-xs sm:text-sm font-bold text-amber-900 flex items-center space-x-2">
+                        <span>Peringatan Dana Mengendap (Idle Fund Warning)</span>
+                    </h3>
+                    <p class="mt-1 text-xs text-amber-800 leading-relaxed">
+                        Rasio penyaluran kas masjid saat ini masih di bawah target efisiensi sosial (&lt; 50%). Dalam perspektif Keuangan Publik Islam, kas masjid yang menumpuk tanpa disalurkan dianjurkan untuk segera dikontribusikan pada program pemberdayaan jemaah, beasiswa pendidikan, atau bantuan ekonomi fakir miskin di lingkungan sekitar masjid.
+                    </p>
+                </div>
+                <button onclick="dismissAlert()" class="text-amber-500 hover:text-amber-700 text-sm ml-2">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Metric Cards Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            
+            <!-- Combined Balance -->
+            <div class="glass-card rounded-2xl p-5 shadow-sm border-l-4 border-emerald-600 flex justify-between items-start">
+                <div>
+                    <p class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Total Kas Masjid</p>
+                    <h3 id="cardTotalBalance" class="text-2xl font-extrabold text-slate-800 mt-1">Rp 0</h3>
+                    <p class="text-[11px] text-emerald-700 font-semibold mt-1 flex items-center">
+                        <i class="fa-solid fa-shield-halved mr-1"></i> Gabungan Seluruh Kas
+                    </p>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-wallet"></i>
+                </div>
+            </div>
+
+            <!-- Zakat (Restricted) -->
+            <div class="glass-card rounded-2xl p-5 shadow-sm border-l-4 border-amber-500 flex justify-between items-start">
+                <div>
+                    <div class="flex items-center space-x-1.5">
+                        <p class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Kas Zakat</p>
+                        <span class="bg-amber-100 text-amber-800 text-[10px] px-1.5 py-0.2 font-bold rounded">Terikat</span>
+                    </div>
+                    <h3 id="cardZakatBalance" class="text-xl font-bold text-slate-800 mt-1">Rp 0</h3>
+                    <p class="text-[11px] text-amber-700 font-medium mt-1">Khusus 8 Asnaf (QS 9:60)</p>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-hand-holding-hand"></i>
+                </div>
+            </div>
+
+            <!-- Infaq & Sedekah (Unrestricted) -->
+            <div class="glass-card rounded-2xl p-5 shadow-sm border-l-4 border-teal-500 flex justify-between items-start">
+                <div>
+                    <div class="flex items-center space-x-1.5">
+                        <p class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Infaq / Sedekah</p>
+                        <span class="bg-teal-100 text-teal-800 text-[10px] px-1.5 py-0.2 font-bold rounded">Fleksibel</span>
+                    </div>
+                    <h3 id="cardInfaqBalance" class="text-xl font-bold text-slate-800 mt-1">Rp 0</h3>
+                    <p class="text-[11px] text-teal-700 font-medium mt-1">Operasional & Kegiatan</p>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-coins"></i>
+                </div>
+            </div>
+
+            <!-- Social Efficiency Rate -->
+            <div class="glass-card rounded-2xl p-5 shadow-sm border-l-4 border-blue-500 flex justify-between items-start">
+                <div>
+                    <p class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Rasio Penyaluran Kas</p>
+                    <h3 id="cardEfficiencyRate" class="text-2xl font-extrabold text-slate-800 mt-1">0%</h3>
+                    <p id="cardWakafBalance" class="text-[11px] text-blue-700 font-medium mt-1">Wakaf Uang: Rp 0</p>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-chart-pie"></i>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Social Allocation & Qardhul Hasan Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Asnaf Zakat Distribution Chart -->
+            <div class="lg:col-span-2 glass-card rounded-2xl p-5 shadow-sm space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-2">
+                    <div>
+                        <h2 class="font-bold text-slate-800 flex items-center space-x-2 text-sm sm:text-base">
+                            <i class="fa-solid fa-users-viewfinder text-emerald-600"></i>
+                            <span>Distribusi Kas Zakat (Pilar Takaful / 8 Asnaf)</span>
+                        </h2>
+                        <p class="text-xs text-slate-500">Realisasi penyaluran dana terikat untuk keadilan sosial jemaah</p>
+                    </div>
+                    <span class="text-[11px] bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full font-bold self-start sm:self-auto">PSAK 109</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                    <div class="h-44 relative flex items-center justify-center">
+                        <canvas id="asnafChart"></canvas>
+                    </div>
+                    <div class="space-y-2 text-xs">
+                        <div class="flex justify-between items-center p-2 rounded-xl bg-slate-50 border border-slate-100">
+                            <span class="font-medium flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-emerald-600 mr-2"></span> Fakir & Miskin</span>
+                            <span id="asnafFakir" class="font-bold text-slate-700">Rp 0</span>
+                        </div>
+                        <div class="flex justify-between items-center p-2 rounded-xl bg-slate-50 border border-slate-100">
+                            <span class="font-medium flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 mr-2"></span> Gharimin (Hutang Murni)</span>
+                            <span id="asnafGharimin" class="font-bold text-slate-700">Rp 0</span>
+                        </div>
+                        <div class="flex justify-between items-center p-2 rounded-xl bg-slate-50 border border-slate-100">
+                            <span class="font-medium flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-teal-500 mr-2"></span> Ibnu Sabil (Beasiswa)</span>
+                            <span id="asnafIbnuSabil" class="font-bold text-slate-700">Rp 0</span>
+                        </div>
+                        <div class="flex justify-between items-center p-2 rounded-xl bg-slate-50 border border-slate-100">
+                            <span class="font-medium flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 mr-2"></span> Asnaf Lainnya</span>
+                            <span id="asnafLainnya" class="font-bold text-slate-700">Rp 0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Qardhul Hasan Micro Loan Module -->
+            <div class="glass-card rounded-2xl p-5 shadow-sm flex flex-col justify-between space-y-4">
+                <div>
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                        <h3 class="font-bold text-slate-800 text-sm sm:text-base flex items-center space-x-2">
+                            <i class="fa-solid fa-hand-holding-dollar text-amber-600"></i>
+                            <span>Qardhul Hasan</span>
+                        </h3>
+                        <span class="text-[10px] bg-amber-100 text-amber-800 font-extrabold px-2 py-0.5 rounded-full">Bebas Riba</span>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+                        Pinjaman kebajikan tanpa bunga & tanpa denda bagi jemaah miskin/pelaku usaha mikro agar terlepas dari jeratan rentenir.
+                    </p>
+
+                    <div class="mt-4 space-y-3">
+                        <div class="bg-amber-50/70 p-3 rounded-xl border border-amber-200/60">
+                            <div class="flex justify-between text-xs font-bold text-amber-950">
+                                <span>Dana Bergulir Aktif:</span>
+                                <span id="qardhActiveTotal">Rp 0</span>
+                            </div>
+                            <div class="w-full bg-amber-200 rounded-full h-2 mt-2">
+                                <div id="qardhProgressBar" class="bg-amber-600 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                            </div>
+                            <div class="flex justify-between text-[10px] text-amber-800 mt-1 font-medium">
+                                <span id="qardhBeneficiaries">0 Penerima Manfaat</span>
+                                <span>Tingkat Pengembalian: 100%</span>
+                            </div>
+                        </div>
+
+                        <div class="text-xs text-slate-600 space-y-1.5 pt-1">
+                            <div class="flex justify-between">
+                                <span class="text-slate-500">Sumber Dana:</span>
+                                <span class="font-semibold text-slate-700">Infaq Fleksibel / Wakaf</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-500">Target Usaha:</span>
+                                <span class="font-semibold text-slate-700">Pedagang Kecil / Sembako</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="openModal('qardhModal')" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition shadow text-center">
+                    <i class="fa-solid fa-plus-circle mr-1"></i> Catat Pinjaman Qardh Baru
+                </button>
+            </div>
+
+        </div>
+
+        <!-- Ledger & Transaction Section -->
+        <div class="glass-card rounded-2xl p-5 shadow-sm space-y-4">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div>
+                    <h2 class="font-bold text-slate-800 text-base sm:text-lg flex items-center space-x-2">
+                        <i class="fa-solid fa-receipt text-emerald-600"></i>
+                        <span>Buku Kas & Buku Besar Transaksi</span>
+                    </h2>
+                    <p class="text-xs text-slate-500">Catatan mutasi keuangan publik terverifikasi</p>
+                </div>
+
+                <!-- Filters & Actions -->
+                <div class="flex flex-wrap items-center gap-2">
+                    <div class="relative flex-grow sm:flex-grow-0">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-slate-400"></i>
+                        <input type="text" id="searchInput" oninput="renderApp()" placeholder="Cari transaksi..." class="pl-8 pr-3 py-1.5 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 w-full sm:w-48">
+                    </div>
+                    
+                    <select id="filterCategory" onchange="renderApp()" class="py-1.5 px-3 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+                        <option value="ALL">Semua Kategori</option>
+                        <option value="Infaq Umum">Infaq Umum / Kotak Jum'at</option>
+                        <option value="Zakat Maal">Zakat Maal</option>
+                        <option value="Zakat Fitrah">Zakat Fitrah</option>
+                        <option value="Wakaf Uang">Wakaf Uang</option>
+                        <option value="Operasional">Operasional Masjid</option>
+                        <option value="Santunan Mustahik">Santunan Mustahik</option>
+                        <option value="Pemberdayaan Umat">Pemberdayaan Umat / Qardh</option>
+                    </select>
+
+                    <select id="filterType" onchange="renderApp()" class="py-1.5 px-3 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+                        <option value="ALL">Semua Jenis</option>
+                        <option value="IN">Pemasukan (+)</option>
+                        <option value="OUT">Pengeluaran (-)</option>
+                    </select>
+
+                    <button onclick="exportCSV()" class="py-1.5 px-3 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl shadow transition flex items-center space-x-1" title="Unduh CSV">
+                        <i class="fa-solid fa-file-csv text-sm"></i>
+                        <span>Export CSV</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Transaction Table -->
+            <div class="overflow-x-auto rounded-xl border border-slate-200">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead class="bg-slate-100 text-slate-700 font-bold uppercase tracking-wider border-b border-slate-200">
+                        <tr>
+                            <th class="py-3 px-4">Tanggal</th>
+                            <th class="py-3 px-4">Kategori Dana</th>
+                            <th class="py-3 px-4">Uraian / Keterangan</th>
+                            <th class="py-3 px-4">Jenis Kas</th>
+                            <th class="py-3 px-4 text-right">Nominal (Rp)</th>
+                            <th class="py-3 px-4 text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionTableBody" class="divide-y divide-slate-100 bg-white">
+                        <!-- Dynamic Content -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden text-center py-10">
+                <i class="fa-solid fa-inbox text-slate-300 text-4xl mb-2"></i>
+                <p class="text-xs text-slate-500">Tidak ada data transaksi yang sesuai dengan filter.</p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Friday Digital Signage / Mode TV Screen -->
+    <div id="signageView" class="hidden fixed inset-0 signage-gradient text-white z-50 overflow-y-auto p-6 sm:p-10 flex flex-col justify-between">
+        
+        <!-- Top Bar Signage -->
+        <div class="flex flex-col sm:flex-row justify-between items-center border-b border-emerald-800/60 pb-4 gap-4">
+            <div class="flex items-center space-x-4">
+                <div class="w-14 h-14 rounded-2xl bg-emerald-600 text-amber-300 flex items-center justify-center text-3xl font-bold shadow-lg">
+                    <i class="fa-solid fa-mosque"></i>
+                </div>
+                <div>
+                    <h2 id="signageMosqueTitle" class="text-2xl sm:text-3xl font-extrabold tracking-wide text-emerald-300 uppercase">MASJID AL-AMANAH</h2>
+                    <p class="text-xs text-emerald-200/80 uppercase tracking-widest font-semibold">Laporan Kas Publik Jum'at & Transparansi Umat</p>
+                </div>
+            </div>
+
+            <!-- Clock & Close -->
+            <div class="flex items-center space-x-6">
+                <div class="text-right">
+                    <div id="clockDisplay" class="text-2xl font-mono font-bold text-amber-400">00:00:00</div>
+                    <div id="dateDisplay" class="text-xs text-emerald-200">Rabu, 28 Oktober 2026</div>
+                </div>
+                <button onclick="toggleSignageMode()" class="px-3 py-2 bg-slate-800/80 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl border border-slate-700">
+                    <i class="fa-solid fa-xmark mr-1"></i> Tutup Mode TV
+                </button>
+            </div>
+        </div>
+
+        <!-- Metric Highlight Cards TV -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 my-6">
+            <div class="bg-slate-900/80 border border-emerald-800/60 p-6 rounded-2xl backdrop-blur">
+                <p class="text-xs font-bold text-emerald-300 uppercase tracking-wider">Kas Infaq & Operasional</p>
+                <h3 id="signageInfaq" class="text-3xl font-extrabold text-teal-300 mt-2">Rp 0</h3>
+                <p class="text-xs text-slate-400 mt-1">Saldo Pemeliharaan & Kegiatan</p>
+            </div>
+            <div class="bg-slate-900/80 border border-emerald-800/60 p-6 rounded-2xl backdrop-blur">
+                <p class="text-xs font-bold text-amber-400 uppercase tracking-wider">Kas Zakat (8 Asnaf)</p>
+                <h3 id="signageZakat" class="text-3xl font-extrabold text-amber-300 mt-2">Rp 0</h3>
+                <p class="text-xs text-slate-400 mt-1">Saluran Terikat Bagi Mustahik</p>
+            </div>
+            <div class="bg-slate-900/80 border border-emerald-800/60 p-6 rounded-2xl backdrop-blur">
+                <p class="text-xs font-bold text-rose-400 uppercase tracking-wider">Total Penyaluran Sosial Pekan Ini</p>
+                <h3 id="signageOut" class="text-3xl font-extrabold text-rose-300 mt-2">Rp 0</h3>
+                <p class="text-xs text-slate-400 mt-1">Bantuan Warga & Operasional</p>
+            </div>
+        </div>
+
+        <!-- Recent Transactions TV View -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 my-auto">
+            <!-- Pemasukan -->
+            <div class="bg-slate-900/60 rounded-2xl p-5 border border-emerald-900">
+                <h4 class="text-emerald-400 font-bold text-base mb-3 flex items-center">
+                    <i class="fa-solid fa-arrow-down mr-2"></i> Pemasukan Kas Terbaru
+                </h4>
+                <div id="signageInList" class="space-y-2 text-xs">
+                    <!-- Dynamic -->
+                </div>
+            </div>
+
+            <!-- Penyaluran -->
+            <div class="bg-slate-900/60 rounded-2xl p-5 border border-emerald-900">
+                <h4 class="text-rose-400 font-bold text-base mb-3 flex items-center">
+                    <i class="fa-solid fa-arrow-up mr-2"></i> Penyaluran & Pengeluaran Terbaru
+                </h4>
+                <div id="signageOutList" class="space-y-2 text-xs">
+                    <!-- Dynamic -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Islamic Public Finance Message Footer -->
+        <div class="mt-6 pt-4 border-t border-emerald-800/60 flex flex-col sm:flex-row justify-between items-center text-xs text-emerald-200/80 gap-2">
+            <p><i class="fa-solid fa-quote-left mr-1 text-amber-400"></i> "Harta tidak akan berkurang karena sedekah." (HR. Muslim)</p>
+            <p class="text-[11px]">Jazakumullah Khairan Katsiran kepada seluruh Donatur & Jemaah Masjid.</p>
+        </div>
+    </div>
+
+    <!-- Modal Form: Add Transaction -->
+    <div id="txModal" class="hidden fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100">
+            <div class="bg-emerald-950 text-white p-4 flex justify-between items-center">
+                <h3 class="font-bold text-sm sm:text-base flex items-center space-x-2">
+                    <i class="fa-solid fa-file-circle-plus text-amber-400"></i>
+                    <span>Tambah Transaksi Kas Masjid</span>
+                </h3>
+                <button onclick="closeModal('txModal')" class="text-slate-300 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <form id="txForm" onsubmit="handleFormSubmit(event)" class="p-5 space-y-4 text-xs">
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Tanggal</label>
+                        <input type="date" id="txDate" required class="w-full p-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Jenis Transaksi</label>
+                        <select id="txType" required class="w-full p-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white">
+                            <option value="IN">Pemasukan (+)</option>
+                            <option value="OUT">Pengeluaran / Penyaluran (-)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Kategori Dana</label>
+                        <select id="txCategory" required class="w-full p-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white">
+                            <option value="Infaq Umum">Infaq Umum / Kotak Jum'at</option>
+                            <option value="Zakat Maal">Zakat Maal (Terikat 8 Asnaf)</option>
+                            <option value="Zakat Fitrah">Zakat Fitrah</option>
+                            <option value="Wakaf Uang">Wakaf Uang (Pokok Abadi)</option>
+                            <option value="Operasional">Operasional & Maintenance</option>
+                            <option value="Santunan Mustahik">Santunan Mustahik / Sembako</option>
+                            <option value="Pemberdayaan Umat">Pemberdayaan Umat / Qardh</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Nominal (Rp)</label>
+                        <input type="number" id="txAmount" min="1000" placeholder="Contoh: 500000" required class="w-full p-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Keterangan / Uraian</label>
+                    <input type="text" id="txDescription" placeholder="Uraian peruntukan transaksi..." required class="w-full p-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Referensi / Penanggung Jawab DKM</label>
+                    <input type="text" id="txProof" placeholder="Nomor kuitansi / Nama pengurus" class="w-full p-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                </div>
+
+                <div class="pt-3 border-t border-slate-100 flex justify-end space-x-2">
+                    <button type="button" onclick="closeModal('txModal')" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-semibold hover:bg-slate-200 transition">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-emerald-700 text-white rounded-xl font-bold hover:bg-emerald-600 transition shadow">Simpan Transaksi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Form: Add Qardhul Hasan Loan -->
+    <div id="qardhModal" class="hidden fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-100">
+            <div class="bg-slate-900 text-white p-4 flex justify-between items-center">
+                <h3 class="font-bold text-sm sm:text-base flex items-center space-x-2">
+                    <i class="fa-solid fa-hand-holding-dollar text-amber-400"></i>
+                    <span>Tambah Pinjaman Kebajikan (Qardh)</span>
+                </h3>
+                <button onclick="closeModal('qardhModal')" class="text-slate-300 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <form id="qardhForm" onsubmit="handleQardhSubmit(event)" class="p-5 space-y-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Nama Penerima Manfaat (Jemaah)</label>
+                    <input type="text" id="qardhName" required placeholder="Nama lengkap jemaah..." class="w-full p-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Tujuan Usaha / Pembiayaan</label>
+                    <input type="text" id="qardhPurpose" required placeholder="Contoh: Modal Dagang Keliling / Sembako" class="w-full p-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Nominal Pinjaman (Rp)</label>
+                    <input type="number" id="qardhAmount" min="100000" required placeholder="Contoh: 1000000" class="w-full p-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                </div>
+
+                <div class="bg-amber-50 p-3 rounded-xl border border-amber-200 text-[11px] text-amber-900">
+                    <i class="fa-solid fa-circle-info mr-1"></i> Pinjaman Qardhul Hasan murni tanpa bunga, biaya admin, maupun agunan. Transaksi ini akan otomatis memotong Kas Infaq Fleksibel.
+                </div>
+
+                <div class="pt-3 border-t border-slate-100 flex justify-end space-x-2">
+                    <button type="button" onclick="closeModal('qardhModal')" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-semibold hover:bg-slate-200 transition">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-amber-600 text-slate-950 rounded-xl font-bold hover:bg-amber-500 transition shadow">Cairkan Pinjaman Qardh</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Application Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500 space-y-1">
+            <p><strong>MasjidFinance</strong> — Open-Source Islamic Public Finance Platform.</p>
+            <p class="text-[11px] text-slate-400">Akuntabilitas Berbasis PSAK 109 & Efisiensi Distribusi Kas Umat Bebas Riba.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Initial Sample Data (Persisted in LocalStorage)
+        const DEFAULT_TRANSACTIONS = [
+            { id: '1', date: '2026-10-24', type: 'IN', category: 'Infaq Umum', amount: 4500000, description: 'Infaq Kotak Jum\'at & QRIS Jamaah', proof: 'KW-001' },
+            { id: '2', date: '2026-10-25', type: 'IN', category: 'Zakat Maal', amount: 6000000, description: 'Zakat Maal H. Ahmad Syafi\'i', proof: 'ZKT-012' },
+            { id: '3', date: '2026-10-25', type: 'OUT', category: 'Santunan Mustahik', amount: 2500000, description: 'Paket Sembako 12 Lansia Dhuafa (Asnaf Miskin)', proof: 'STN-001' },
+            { id: '4', date: '2026-10-26', type: 'OUT', category: 'Operasional', amount: 850000, description: 'Token Listrik & Air Wudu Masjid Bulan Ini', proof: 'PLN-998' },
+            { id: '5', date: '2026-10-26', type: 'IN', category: 'Wakaf Uang', amount: 3000000, description: 'Wakaf Uang Abadi Pembebasan Lahan Parkir', proof: 'WKF-004' },
+            { id: '6', date: '2026-10-27', type: 'OUT', category: 'Santunan Mustahik', amount: 1200000, description: 'Bantuan Pelunasan Tunggakan SPP Sekolah (Ibnu Sabil)', proof: 'BSW-002' },
+            { id: '7', date: '2026-10-28', type: 'OUT', category: 'Pemberdayaan Umat', amount: 1000000, description: 'Pinjaman Qardhul Hasan Modal Dagang Bakso (Bpk. Mulyadi)', proof: 'QRD-001' }
+        ];
+
+        let transactions = JSON.parse(localStorage.getItem('masjid_tx_data')) || DEFAULT_TRANSACTIONS;
+        let mosqueName = localStorage.getItem('masjid_name') || 'Masjid Al-Amanah';
+        let asnafChartInstance = null;
+
+        // Save State to LocalStorage
+        function saveData() {
+            localStorage.setItem('masjid_tx_data', JSON.stringify(transactions));
+            localStorage.setItem('masjid_name', mosqueName);
+        }
+
+        // Currency Formatter
+        function formatRp(val) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val);
+        }
+
+        // Main Render Loop
+        function renderApp() {
+            // Update Mosque Titles
+            document.getElementById('headerMosqueName').innerText = mosqueName;
+            document.getElementById('signageMosqueTitle').innerText = mosqueName.toUpperCase();
+
+            const searchKey = document.getElementById('searchInput').value.toLowerCase();
+            const categoryFilter = document.getElementById('filterCategory').value;
+            const typeFilter = document.getElementById('filterType').value;
+
+            let totalIn = 0, totalOut = 0;
+            let zakatIn = 0, zakatOut = 0;
+            let infaqIn = 0, infaqOut = 0;
+            let wakafIn = 0, wakafOut = 0;
+
+            let asnafFakir = 0, asnafGharim = 0, asnafIbnuSabil = 0, asnafLainnya = 0;
+            let qardhActiveTotal = 0;
+            let qardhCount = 0;
+
+            // Compute Financial Metrics
+            transactions.forEach(tx => {
+                const amt = Number(tx.amount);
+                if (tx.type === 'IN') {
+                    totalIn += amt;
+                    if (tx.category.includes('Zakat')) zakatIn += amt;
+                    else if (tx.category.includes('Wakaf')) wakafIn += amt;
+                    else infaqIn += amt;
+                } else {
+                    totalOut += amt;
+                    if (tx.category.includes('Zakat') || tx.category === 'Santunan Mustahik') {
+                        zakatOut += amt;
+                        const desc = tx.description.toLowerCase();
+                        if (desc.includes('miskin') || desc.includes('lansia') || desc.includes('sembako') || desc.includes('dhuafa')) {
+                            asnafFakir += amt;
+                        } else if (desc.includes('utang') || desc.includes('hutang') || desc.includes('gharim')) {
+                            asnafGharim += amt;
+                        } else if (desc.includes('sekolah') || desc.includes('spp') || desc.includes('beasiswa') || desc.includes('ibnu sabil')) {
+                            asnafIbnuSabil += amt;
+                        } else {
+                            asnafLainnya += amt;
+                        }
+                    } else if (tx.category.includes('Wakaf')) {
+                        wakafOut += amt;
+                    } else {
+                        infaqOut += amt;
+                    }
+
+                    if (tx.category === 'Pemberdayaan Umat' || tx.description.toLowerCase().includes('qardh')) {
+                        qardhActiveTotal += amt;
+                        qardhCount++;
+                    }
+                }
+            });
+
+            const totalBalance = totalIn - totalOut;
+            const zakatBalance = zakatIn - zakatOut;
+            const infaqBalance = infaqIn - infaqOut;
+            const wakafBalance = wakafIn - wakafOut;
+
+            const efficiencyRate = totalIn > 0 ? Math.min(Math.round((totalOut / totalIn) * 100), 100) : 0;
+
+            // Render Card Values
+            document.getElementById('cardTotalBalance').innerText = formatRp(totalBalance);
+            document.getElementById('cardZakatBalance').innerText = formatRp(zakatBalance);
+            document.getElementById('cardInfaqBalance').innerText = formatRp(infaqBalance);
+            document.getElementById('cardWakafBalance').innerText = `Wakaf Uang: ${formatRp(wakafBalance)}`;
+            document.getElementById('cardEfficiencyRate').innerText = `${efficiencyRate}%`;
+
+            // Idle Fund Alert Check
+            const alertBox = document.getElementById('idleFundAlert');
+            if (totalBalance > 5000000 && efficiencyRate < 50) {
+                alertBox.classList.remove('hidden');
+            } else {
+                alertBox.classList.add('hidden');
+            }
+
+            // Render Qardhul Hasan Card
+            document.getElementById('qardhActiveTotal').innerText = formatRp(qardhActiveTotal);
+            document.getElementById('qardhBeneficiaries').innerText = `${qardhCount} Penerima Manfaat`;
+            document.getElementById('qardhProgressBar').style.width = `${Math.min(qardhCount * 25, 100)}%`;
+
+            // Render Table Rows
+            const filteredTx = transactions.filter(tx => {
+                const matchSearch = tx.description.toLowerCase().includes(searchKey) ||
+                                    tx.category.toLowerCase().includes(searchKey) ||
+                                    (tx.proof && tx.proof.toLowerCase().includes(searchKey));
+                const matchCat = categoryFilter === 'ALL' || tx.category === categoryFilter;
+                const matchType = typeFilter === 'ALL' || tx.type === typeFilter;
+                return matchSearch && matchCat && matchType;
+            });
+
+            const tbody = document.getElementById('transactionTableBody');
+            tbody.innerHTML = '';
+
+            if (filteredTx.length === 0) {
+                document.getElementById('emptyState').classList.remove('hidden');
+            } else {
+                document.getElementById('emptyState').classList.add('hidden');
+                
+                // Sort Descending by Date
+                filteredTx.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                filteredTx.forEach(tx => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
+
+                    const badge = tx.type === 'IN'
+                        ? `<span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[10px]">Pemasukan</span>`
+                        : `<span class="bg-rose-100 text-rose-800 font-bold px-2 py-0.5 rounded text-[10px]">Pengeluaran</span>`;
+
+                    const amountVal = tx.type === 'IN'
+                        ? `<span class="text-emerald-700 font-bold">+${formatRp(tx.amount)}</span>`
+                        : `<span class="text-rose-600 font-bold">-${formatRp(tx.amount)}</span>`;
+
+                    tr.innerHTML = `
+                        <td class="py-3 px-4 text-slate-600 font-mono text-[11px]">${tx.date}</td>
+                        <td class="py-3 px-4 font-semibold text-slate-800">
+                            <div>${tx.category}</div>
+                            <div class="text-[10px] text-slate-400 font-mono font-normal">${tx.proof || '-'}</div>
+                        </td>
+                        <td class="py-3 px-4 text-slate-600 max-w-xs truncate">${tx.description}</td>
+                        <td class="py-3 px-4">${badge}</td>
+                        <td class="py-3 px-4 text-right">${amountVal}</td>
+                        <td class="py-3 px-4 text-center">
+                            <button onclick="deleteTx('${tx.id}')" class="text-slate-400 hover:text-rose-600 transition" title="Hapus">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            // Update Asnaf Breakdown & Chart
+            document.getElementById('asnafFakir').innerText = formatRp(asnafFakir);
+            document.getElementById('asnafGharimin').innerText = formatRp(asnafGharim);
+            document.getElementById('asnafIbnuSabil').innerText = formatRp(asnafIbnuSabil);
+            document.getElementById('asnafLainnya').innerText = formatRp(asnafLainnya);
+
+            updateChart(asnafFakir, asnafGharim, asnafIbnuSabil, asnafLainnya);
+
+            // Update Signage TV Screen Data
+            updateSignageData(infaqBalance, zakatBalance, totalOut);
+        }
+
+        // Render Chart.js
+        function updateChart(fakir, gharim, ibnuSabil, lainnya) {
+            const ctx = document.getElementById('asnafChart').getContext('2d');
+            if (asnafChartInstance) asnafChartInstance.destroy();
+
+            asnafChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Fakir & Miskin', 'Gharimin', 'Ibnu Sabil', 'Lainnya'],
+                    datasets: [{
+                        data: [fakir || 1, gharim || 0, ibnuSabil || 0, lainnya || 0],
+                        backgroundColor: ['#059669', '#f59e0b', '#14b8a6', '#3b82f6'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    cutout: '72%'
+                }
+            });
+        }
+
+        // Signage Mode Data Generator
+        function updateSignageData(infaqBal, zakatBal, totalOut) {
+            document.getElementById('signageInfaq').innerText = formatRp(infaqBal);
+            document.getElementById('signageZakat').innerText = formatRp(zakatBal);
+            document.getElementById('signageOut').innerText = formatRp(totalOut);
+
+            const inList = document.getElementById('signageInList');
+            const outList = document.getElementById('signageOutList');
+
+            inList.innerHTML = '';
+            outList.innerHTML = '';
+
+            const recentIn = transactions.filter(t => t.type === 'IN').slice(-4).reverse();
+            const recentOut = transactions.filter(t => t.type === 'OUT').slice(-4).reverse();
+
+            recentIn.forEach(t => {
+                inList.innerHTML += `
+                    <div class="flex justify-between items-center bg-slate-800/60 p-2.5 rounded-xl border border-emerald-800/40">
+                        <div>
+                            <p class="font-bold text-slate-200">${t.description}</p>
+                            <p class="text-[10px] text-emerald-300">${t.date} • ${t.category}</p>
+                        </div>
+                        <span class="font-extrabold text-emerald-400 text-sm">+${formatRp(t.amount)}</span>
+                    </div>
+                `;
+            });
+
+            recentOut.forEach(t => {
+                outList.innerHTML += `
+                    <div class="flex justify-between items-center bg-slate-800/60 p-2.5 rounded-xl border border-emerald-800/40">
+                        <div>
+                            <p class="font-bold text-slate-200">${t.description}</p>
+                            <p class="text-[10px] text-rose-300">${t.date} • ${t.category}</p>
+                        </div>
+                        <span class="font-extrabold text-rose-400 text-sm">-${formatRp(t.amount)}</span>
+                    </div>
+                `;
+            });
+        }
+
+        // Form Handlers
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const newTx = {
+                id: Date.now().toString(),
+                date: document.getElementById('txDate').value,
+                type: document.getElementById('txType').value,
+                category: document.getElementById('txCategory').value,
+                amount: Number(document.getElementById('txAmount').value),
+                description: document.getElementById('txDescription').value,
+                proof: document.getElementById('txProof').value || '-'
+            };
+
+            transactions.push(newTx);
+            saveData();
+            renderApp();
+            closeModal('txModal');
+            document.getElementById('txForm').reset();
+            setDefaultDate();
+        }
+
+        function handleQardhSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('qardhName').value;
+            const purpose = document.getElementById('qardhPurpose').value;
+            const amount = Number(document.getElementById('qardhAmount').value);
+
+            const newTx = {
+                id: Date.now().toString(),
+                date: new Date().toISOString().split('T')[0],
+                type: 'OUT',
+                category: 'Pemberdayaan Umat',
+                amount: amount,
+                description: `Pinjaman Qardhul Hasan (${purpose}) - Bpk/Ibu ${name}`,
+                proof: 'QRD-' + Math.floor(100 + Math.random() * 900)
+            };
+
+            transactions.push(newTx);
+            saveData();
+            renderApp();
+            closeModal('qardhModal');
+            document.getElementById('qardhForm').reset();
+        }
+
+        function deleteTx(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) {
+                transactions = transactions.filter(t => t.id !== id);
+                saveData();
+                renderApp();
+            }
+        }
+
+        function changeMosqueName() {
+            const updated = prompt('Masukkan nama Masjid Anda:', mosqueName);
+            if (updated && updated.trim() !== '') {
+                mosqueName = updated.trim();
+                saveData();
+                renderApp();
+            }
+        }
+
+        // CSV Export
+        function exportCSV() {
+            if (transactions.length === 0) {
+                alert('Tidak ada transaksi untuk di-export.');
+                return;
+            }
+
+            let csv = "ID,Tanggal,Jenis,Kategori,Nominal,Keterangan,Referensi\n";
+            transactions.forEach(t => {
+                csv += `"${t.id}","${t.date}","${t.type}","${t.category}","${t.amount}","${t.description.replace(/"/g, '""')}","${t.proof || ''}"\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `Laporan_Kas_${mosqueName.replace(/\s+/g, '_')}.csv`;
+            link.click();
+        }
+
+        // Modal Helpers
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+        function dismissAlert() { document.getElementById('idleFundAlert').classList.add('hidden'); }
+
+        function toggleSignageMode() {
+            const signage = document.getElementById('signageView');
+            signage.classList.toggle('hidden');
+        }
+
+        // Live Clock for TV Signage
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clockDisplay').innerText = now.toLocaleTimeString('id-ID');
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('dateDisplay').innerText = now.toLocaleDateString('id-ID', options);
+        }
+        setInterval(updateClock, 1000);
+
+        function setDefaultDate() {
+            document.getElementById('txDate').value = new Date().toISOString().split('T')[0];
+        }
+
+        // Initial Load
+        window.onload = function() {
+            setDefaultDate();
+            updateClock();
+            renderApp();
+        };
+    </script>
+</body>
+</html>
